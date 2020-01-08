@@ -4,7 +4,7 @@
  - pip install newspaper3k: python package for extracting and parsing newspaper articles
 '''
 
-# STEP 1: Importing Libraries & Package
+# %% STEP 1: Importing Libraries & Package
 from newspaper import Article # We will use the 'newspaper library to extract the text from the website by using the 'Article' class
 import random # We will use the 'random' library to generate a random number for our greeting response
 import string # We will use the 'string' library to process the standard Python string.
@@ -16,11 +16,11 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# STEP 2: Download packages from NLTK
+# %% STEP 2: Download packages from NLTK
 nltk.download('punkt', quiet = True)
 nltk.download('wordnet', quiet = True)
 
-# STEP 3: Get the article URL
+# %% STEP 3: Get the article URL
 article = Article('https://www.mayoclinic.org/diseases-conditions/chronic-kidney-disease/symptoms-causes/syc-20354521')
 article.download()
 article.parse()
@@ -29,14 +29,14 @@ corpus = article.text
 
 print(corpus)
 
-# STEP 4: Tokenize data
+# %% STEP 4: Tokenize data
 text = corpus
 sent_tokens = nltk.sent_tokenize(text)
 
 print(sent_tokens)
 
 
-# STEP 5: Greeting function
+# %% STEP 5: Greeting function
 GREETING_INPUT = ['hello', 'hi', 'hi there']
 GREETING_RESPONSE= ['hello', 'hi', 'hi there']
 
@@ -45,7 +45,7 @@ def greeting(sentence):
         if word.lower() in GREETING_INPUT:
             return random.choice(GREETING_RESPONSE)
 
-# STEP 6: Lemmatization function
+# %% STEP 6: Lemmatization function
 
 # create a dictionary to remove the punctuation
 remove_punc_dict = dict((ord(punct), None) for punct in string.punctuation)
@@ -54,17 +54,35 @@ remove_punc_dict = dict((ord(punct), None) for punct in string.punctuation)
 def lemmonized(text):
     return nltk.word_tokenize(text.lower().translate(remove_punc_dict))
 
-# STEP 7: Generating response
+# %% STEP 7: Generating response
 def response(user_response):
     robo_response = '' # empty response for the bot
+
+    # Append the users response to the sentence list
     sent_tokens.append(user_response)
+
+    # Create a TfidfVectorizer Object
     tfidfVec = TfidfVectorizer(tokenizer = lemmonized, stop_words = 'english')
+
+    # Convert the text to a matrix of TF-IDF features
     tfidf = tfidfVec.fit_transform(sent_tokens)
+
+    # get the measure of similarity (similarity scores)
     vals = cosine_similarity(tfidf[-1], tfidf)
+
+    # Get the index of the most similar text/sentence to the user/s response
     idx = vals.argsort()[0][-2]
+
+    # Reduce the dimensonality of vals
     flat = vals.flatten()
+
+    # Sort the list in ascending order
     flat.sort()
+
+    # Get the most similar score to the users response
     score = flat[-2]
+
+    # If the variable "score" is 0 then there is no text similar to user's response
     if(score == 0):
         robo_response =  robo_response + " Apologies, I dont understand"
     else:
@@ -74,10 +92,10 @@ def response(user_response):
 
     return robo_response
 
-# STEP 8: 
+# %% STEP 8: 
 flag = True
 print("DOCBot: Hello. I'm your assistant. Anything I can help? If you want to exit, type \'Bye\'")
-bye_phrase = ['bye', 'ok bye', 'bye bye']
+#bye_phrase = ['bye', 'ok bye', 'bye bye']
 while(flag):
     user_response = input()
     user_response = user_response.lower()
